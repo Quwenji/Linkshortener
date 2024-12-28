@@ -1,45 +1,50 @@
 <?php
 // index.php
+
+// Fehleranzeige aktivieren (nur zu Entwicklungszwecken)
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
+// Controller einbinden (enthält Funktionen zum Verkürzen und Weiterleiten)
 require_once __DIR__ . '/shortenerController.php';
 
-// Header einbinden
+// Header einbinden (öffnet <html>, <head>, <body>, <header>, <main>)
 require_once __DIR__ . '/header.php';
 
-// Routing
+// Routing-Informationen
 $requestUri = $_SERVER['REQUEST_URI'];
 $requestMethod = $_SERVER['REQUEST_METHOD'];
 
-// Query-String entfernen
+// Query-String entfernen (z.B. /abc123?foo=bar -> /abc123)
 if (strpos($requestUri, '?') !== false) {
     $requestUri = strstr($requestUri, '?', true);
 }
 
-// GET / -> Formular anzeigen
-if ($requestMethod === 'GET' && $requestUri === '/') {
+// Pfad bereinigen (ohne führenden/trailenden Slash)
+$path = trim($requestUri, '/');
+
+// Routing-Logik
+if ($requestMethod === 'GET' && $path === '') {
+    // Startseite anzeigen (Formular)
     require_once __DIR__ . '/templates/form.php';
-    require_once __DIR__ . '/footer.php';
-    exit;
-}
-
-// POST /shorten -> URL verkürzen
-if ($requestMethod === 'POST' && $requestUri === '/shorten') {
+} elseif ($requestMethod === 'POST' && $path === 'shorten') {
+    // URL verkürzen
     shortenUrl();
-    require_once __DIR__ . '/footer.php';
-    exit;
+} elseif ($requestMethod === 'GET' && $path !== '') {
+    // Weiterleitung
+    redirectUrl($path);
+} else {
+    // 404 Fehlerseite
+    http_response_code(404);
+    ?>
+    <div class='bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4'>
+        <p class='font-semibold'>Fehler:</p>
+        <p>Seite nicht gefunden.</p>
+    </div>
+    <?php
 }
 
-// GET /irgendwas -> Weiterleitung
-if ($requestMethod === 'GET' && $requestUri !== '/') {
-    $code = ltrim($requestUri, '/');
-    redirectUrl($code);
-    require_once __DIR__ . '/footer.php';
-    exit;
-}
-
-// Fallback: 404
-http_response_code(404);
-echo "<div class='p-4 border-l-4 border-red-500 bg-red-50 text-red-700 rounded mb-4'>
-        Seite nicht gefunden.
-      </div>";
+// Footer einbinden (schließt <main>, fügt Footer hinzu, schließt <body> und <html>)
 require_once __DIR__ . '/footer.php';
-exit;
+?>

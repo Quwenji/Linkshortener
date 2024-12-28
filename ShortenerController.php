@@ -14,7 +14,7 @@ function shortenUrl()
     // 1. Validierung der longUrl
     if (empty($longUrl) || !filter_var($longUrl, FILTER_VALIDATE_URL)) {
         http_response_code(400);
-        echo "<div class='p-4 border-l-4 border-red-500 bg-red-50 text-red-700 rounded mb-4'>
+        echo "<div class='bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4'>
                 <p class='font-semibold'>Fehler:</p>
                 <p>Bitte eine gültige URL angeben!</p>
               </div>";
@@ -26,11 +26,11 @@ function shortenUrl()
         // Zufälligen Code generieren
         $code = generateCode(6);
     } else {
-        // Alias säubern (z.B. nur alphanumerisch, -, _)
+        // Alias säubern (nur alphanumerisch + -, _)
         $alias = preg_replace('/[^a-zA-Z0-9-_]/', '', $userAlias);
         if (empty($alias)) {
             http_response_code(400);
-            echo "<div class='p-4 border-l-4 border-red-500 bg-red-50 text-red-700 rounded mb-4'>
+            echo "<div class='bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4'>
                     <p class='font-semibold'>Fehler:</p>
                     <p>Alias enthält ungültige Zeichen.</p>
                   </div>";
@@ -47,7 +47,7 @@ function shortenUrl()
 
     if ($exists > 0) {
         http_response_code(409); // Conflict
-        echo "<div class='p-4 border-l-4 border-red-500 bg-red-50 text-red-700 rounded mb-4'>
+        echo "<div class='bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4'>
                 <p class='font-semibold'>Fehler:</p>
                 <p>Der Alias <b>$code</b> ist leider schon vergeben.</p>
               </div>";
@@ -64,23 +64,22 @@ function shortenUrl()
     // 5. Erfolgsmeldung
     $shortUrl = 'http://' . $_SERVER['HTTP_HOST'] . '/' . $code;
 
-    echo "<div class='p-4 border-l-4 border-green-500 bg-green-50 text-green-800 rounded mb-4'>
+    echo "<div class='bg-green-50 border-l-4 border-green-500 text-green-800 p-4 rounded mb-4'>
             <p class='font-semibold'>Erfolg:</p>
-            <p>
-              Dein Kurzlink: 
-              <a class='underline text-blue-600' href='$shortUrl' target='_blank'>$shortUrl</a>
+            <p>Dein Kurzlink:
+                <a class='underline text-blue-600' href='$shortUrl' target='_blank'>$shortUrl</a>
             </p>
           </div>";
 }
 
 /**
- * GET /foo -> Weiterleitung
+ * GET /{code} -> Weiterleitung zur langen URL.
  */
 function redirectUrl($code)
 {
     if (empty($code)) {
         http_response_code(400);
-        echo "<div class='p-4 border-l-4 border-red-500 bg-red-50 text-red-700 rounded mb-4'>
+        echo "<div class='bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4'>
                 <p class='font-semibold'>Fehler:</p>
                 <p>Kein Code angegeben!</p>
               </div>";
@@ -94,20 +93,20 @@ function redirectUrl($code)
 
     if (!$row) {
         http_response_code(404);
-        echo "<div class='p-4 border-l-4 border-red-500 bg-red-50 text-red-700 rounded mb-4'>
+        echo "<div class='bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4'>
                 <p class='font-semibold'>Fehler:</p>
                 <p>Alias oder Code <b>$code</b> nicht gefunden!</p>
               </div>";
         return;
     }
 
-    // Weiterleitung
+    // Weiterleitung zur langen URL
     header('Location: ' . $row['long_url'], true, 302);
     exit;
 }
 
 /**
- * Zufälliger String (z.B. 6 Zeichen [0-9a-zA-Z])
+ * Erzeugt einen zufälligen String (z.B. 6 Zeichen [0-9a-zA-Z]).
  */
 function generateCode($length = 6)
 {
@@ -119,3 +118,4 @@ function generateCode($length = 6)
     }
     return $result;
 }
+?>
