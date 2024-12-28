@@ -1,15 +1,17 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
-    <meta charset="UTF-8">
-    <title>Linkshortener</title>
+  <meta charset="UTF-8">
+  <title>Mein Linkshortener (ohne Composer)</title>
 </head>
 <body>
-    <h1>Link verkürzen</h1>
-    <form action="/shorten" method="post">
-        <label for="longUrl">Lange URL:</label>
-        <input type="text" name="longUrl" id="longUrl" required>
-        <button type="submit">Verkürzen</button>
-    </form>
+  <h1>Link verkürzen</h1>
+  <form action="/shorten" method="post">
+    <p>
+      <label for="longUrl">Lange URL:</label>
+      <input type="text" id="longUrl" name="longUrl" placeholder="https://beispiel.de" required>
+    </p>
+    <p><button type="submit">Verkürzen</button></p>
+  </form>
 </body>
 </html>
