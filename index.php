@@ -1,38 +1,45 @@
 <?php
 // index.php
-
-// Wir binden nur den Controller ein. Der Controller bindet selbst database.php.
 require_once __DIR__ . '/shortenerController.php';
 
-// Request-URI ermitteln
-$requestUri = $_SERVER['REQUEST_URI'];   // z.B. "/shorten" oder "/abc123"
-$requestMethod = $_SERVER['REQUEST_METHOD']; // GET oder POST
+// Header einbinden
+require_once __DIR__ . '/header.php';
 
-// Query-String abschneiden? ("/abc123?foo=bar" -> "/abc123")
+// Routing
+$requestUri = $_SERVER['REQUEST_URI'];
+$requestMethod = $_SERVER['REQUEST_METHOD'];
+
+// Query-String entfernen
 if (strpos($requestUri, '?') !== false) {
     $requestUri = strstr($requestUri, '?', true);
 }
 
-// Routing:
+// GET / -> Formular anzeigen
 if ($requestMethod === 'GET' && $requestUri === '/') {
-    // Formular zeigen
-    include __DIR__ . '/templates/form.html';
+    require_once __DIR__ . '/templates/form.php';
+    require_once __DIR__ . '/footer.php';
     exit;
 }
 
 // POST /shorten -> URL verkürzen
 if ($requestMethod === 'POST' && $requestUri === '/shorten') {
     shortenUrl();
+    require_once __DIR__ . '/footer.php';
     exit;
 }
 
-// GET /abc123 -> Weiterleitung
+// GET /irgendwas -> Weiterleitung
 if ($requestMethod === 'GET' && $requestUri !== '/') {
-    $shortCode = ltrim($requestUri, '/');  // "/abc123" -> "abc123"
-    redirectUrl($shortCode);
+    $code = ltrim($requestUri, '/');
+    redirectUrl($code);
+    require_once __DIR__ . '/footer.php';
     exit;
 }
 
 // Fallback: 404
 http_response_code(404);
-echo "Seite nicht gefunden!";
+echo "<div class='p-4 border-l-4 border-red-500 bg-red-50 text-red-700 rounded mb-4'>
+        Seite nicht gefunden.
+      </div>";
+require_once __DIR__ . '/footer.php';
+exit;

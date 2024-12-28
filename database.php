@@ -2,25 +2,24 @@
 // database.php
 
 /**
- * Liest Variablen aus einer .env-Datei und gibt sie als assoziatives Array zurück.
+ * Liest Variablen aus einer .env-Datei (im Projekt-Root) und gibt sie als Array zurück.
  */
 function parseEnv($envPath)
 {
     if (!file_exists($envPath)) {
-        // Notfallbehandlung, wenn .env fehlt
-        die(".env-Datei nicht gefunden! Pfad: $envPath");
+        die("Fehler: .env-Datei nicht gefunden ($envPath)");
     }
 
     $vars = [];
     $lines = file($envPath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
 
     foreach ($lines as $line) {
-        // Zeilen, die mit # beginnen, ignorieren (Kommentare)
+        // Kommentarzeilen überspringen
         if (strpos(trim($line), '#') === 0) {
             continue;
         }
 
-        // In Form: SCHLUESSEL=WERT
+        // KEY=VALUE
         $parts = explode('=', $line, 2);
         if (count($parts) === 2) {
             $key = trim($parts[0]);
@@ -33,7 +32,7 @@ function parseEnv($envPath)
 }
 
 /**
- * Stellt eine PDO-Verbindung her.
+ * Stellt eine (Singleton-)PDO-Verbindung her, basierend auf den in .env definierten Daten.
  */
 function getConnection()
 {
@@ -41,16 +40,16 @@ function getConnection()
 
     if ($pdo === null) {
         // (1) .env-Datei parsen
-        $envPath = __DIR__ . '/.env'; // Falls .env im gleichen Ordner wie database.php liegt
+        $envPath = __DIR__ . '/.env'; 
         $env = parseEnv($envPath);
 
-        // (2) Datenbankinfos holen
+        // (2) DB-Zugangsdaten
         $host = $env['DB_HOST'] ?? 'localhost';
         $dbName = $env['DB_NAME'] ?? '';
         $user = $env['DB_USER'] ?? 'root';
         $pass = $env['DB_PASS'] ?? '';
 
-        // (3) DSN bauen
+        // (3) DSN
         $dsn = "mysql:host=$host;dbname=$dbName;charset=utf8mb4";
 
         try {
@@ -58,8 +57,7 @@ function getConnection()
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
             ]);
         } catch (PDOException $e) {
-            // Falls was schief geht
-            die("DB-Verbindungsfehler: " . $e->getMessage());
+            die("Datenbank-Verbindungsfehler: " . $e->getMessage());
         }
     }
 
