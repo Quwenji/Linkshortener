@@ -4,6 +4,23 @@
 require_once __DIR__ . '/database.php';
 
 /**
+ * Überprüft, ob ein String unerwünschte Wörter enthält.
+ */
+function isBlacklisted($string)
+{
+    // Blacklist aus externer Datei laden
+    $blacklist = include __DIR__ . '/blacklist.php';
+
+    foreach ($blacklist as $word) {
+        if (stripos($string, $word) !== false) {
+            return true; // Wort gefunden
+        }
+    }
+
+    return false; // Kein Wort gefunden
+}
+
+/**
  * POST /shorten -> URL verkürzen (mit optionalem Custom-Alias).
  */
 function shortenUrl()
@@ -24,7 +41,9 @@ function shortenUrl()
     // 2. Alias verarbeiten
     if (empty($userAlias)) {
         // Zufälligen Code generieren
-        $code = generateCode(6);
+        do {
+            $code = generateCode(6);
+        } while (isBlacklisted($code));
     } else {
         // Alias säubern (nur alphanumerisch + -, _)
         $alias = preg_replace('/[^a-zA-Z0-9-_]/', '', $userAlias);
@@ -36,6 +55,17 @@ function shortenUrl()
                   </div>";
             return;
         }
+
+        // Überprüfen, ob Alias auf der Blacklist steht
+        if (isBlacklisted($alias)) {
+            http_response_code(400);
+            echo "<div class='bg-red-50 border-l-4 border-red-500 text-red-700 p-4 rounded mb-4'>
+                    <p class='font-semibold'>Fehler:</p>
+                    <p>Alias enthält unerwünschte Wörter und ist nicht erlaubt.</p>
+                  </div>";
+            return;
+        }
+
         $code = $alias;
     }
 
@@ -118,4 +148,3 @@ function generateCode($length = 6)
     }
     return $result;
 }
-?>
