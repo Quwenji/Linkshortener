@@ -7,7 +7,7 @@ ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
 // Controller einbinden (enthält Funktionen zum Verkürzen und Weiterleiten)
-require_once __DIR__ . '/shortenerController.php';
+require_once __DIR__ . '/ShortenerController.php';
 
 // Header einbinden (öffnet <html>, <head>, <body>, <header>, <main>)
 require_once __DIR__ . '/header.php';
